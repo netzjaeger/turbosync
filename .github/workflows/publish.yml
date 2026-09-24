@@ -108,6 +108,39 @@ jobs:
           github-token: ${{ secrets.TARGET_PAT }}
           script: |
             const [owner, repo] = process.env.TARGET_REPO.split('/');
+
+            // The release tag is version + UTC date, so a same-day re-run
+            // (e.g. retrying after a fix once the previous attempt failed,
+            // or two dispatches overlapping under this workflow's
+            // cancel-in-progress: false concurrency group) reuses the exact
+            // same tag as an earlier run. A draft release doesn't create the
+            // underlying git tag, so getReleaseByTag won't find it -- list
+            // releases and match tag_name directly instead.
+            //
+            // An orphaned draft under this tag (e.g. cleanup-failed-release
+            // didn't get to run, or hasn't finished yet) blocks this run's
+            // own draft from ever publishing, since GitHub rejects
+            // publishing a release whose tag_name any other release already
+            // holds, draft or not. It's safe to delete and replace -- it was
+            // never shipped. An already-published release under this tag
+            // means a build for this exact version+date already shipped
+            // successfully; don't delete real release history out from
+            // under a maintainer, fail loudly instead so a human decides.
+            const existing = await github.paginate(github.rest.repos.listReleases, { owner, repo })
+              .then(releases => releases.find(r => r.tag_name === process.env.TAG));
+
+            if (existing && !existing.draft) {
+              core.setFailed(
+                `Release ${existing.html_url} is already published under tag ${process.env.TAG}. ` +
+                `Refusing to touch it -- if this run's rebuild is intentional, delete or retag that ` +
+                `release by hand first.`
+              );
+              return;
+            }
+            if (existing) {
+              await github.rest.repos.deleteRelease({ owner, repo, release_id: existing.id });
+            }
+
             const { data: release } = await github.rest.repos.createRelease({
               owner,
               repo,
