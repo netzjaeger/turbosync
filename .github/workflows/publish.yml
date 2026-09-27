@@ -390,3 +390,43 @@ jobs:
               repo,
               release_id: Number(process.env.RELEASE_ID),
             });
+
+  notify-failure:
+    needs: [sync, create-draft-release, verify, build-mobile, build-desktop, publish-release]
+    if: |
+      always() &&
+      (needs.sync.result == 'failure' ||
+       needs.create-draft-release.result == 'failure' ||
+       needs.verify.result == 'failure' ||
+       needs.build-mobile.result == 'failure' ||
+       needs.build-desktop.result == 'failure' ||
+       needs.publish-release.result == 'failure')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          TARGET_REPO: ${{ secrets.TARGET_REPO }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          github-token: ${{ secrets.TARGET_PAT }}
+          script: |
+            const [owner, repo] = process.env.TARGET_REPO.split('/');
+            const title = 'Scheduled sync/build/release failed';
+            const body = `The scheduled upstream-sync/build/release run failed: ${process.env.RUN_URL}\n\n` +
+              'Check that run\'s job statuses to see which step aborted (a merge conflict ' +
+              'sync_merge_upstream.py could not auto-resolve, a build/test break, or an ' +
+              'expired secret such as TARGET_PAT or the Android signing key are the usual causes).';
+
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'automation-failure',
+            });
+            const existing = openIssues.find(issue => issue.title === title);
+            if (existing) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({ owner, repo, title, body, labels: ['automation-failure'] });
+            }
