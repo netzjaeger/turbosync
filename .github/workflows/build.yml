@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ secrets.TARGET_REPO }}
           ref: ${{ github.event.inputs.sha || 'main' }}
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ secrets.TARGET_REPO }}
           ref: ${{ github.event.inputs.sha || 'main' }}
@@ -89,7 +89,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ secrets.TARGET_REPO }}
           ref: ${{ github.event.inputs.sha || 'main' }}
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ secrets.TARGET_REPO }}
           ref: ${{ github.event.inputs.sha || 'main' }}
@@ -149,7 +149,7 @@ jobs:
       matrix:
         project: [app]
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ secrets.TARGET_REPO }}
           ref: ${{ github.event.inputs.sha || 'main' }}
@@ -168,7 +168,7 @@ jobs:
     name: Script contracts
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ secrets.TARGET_REPO }}
           ref: ${{ github.event.inputs.sha || 'main' }}
@@ -182,7 +182,7 @@ jobs:
     name: Native advisories and licenses
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ secrets.TARGET_REPO }}
           ref: ${{ github.event.inputs.sha || 'main' }}
